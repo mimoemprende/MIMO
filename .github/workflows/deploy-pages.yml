@@ -1,0 +1,82 @@
+name: Publicar en GitHub Pages
+
+# Requisitos (una sola vez):
+#   1. Settings → Pages → Build and deployment → Source: "GitHub Actions".
+#   2. Settings → Secrets and variables → Actions → Variables:
+#        VITE_SUPABASE_URL        (obligatoria)
+#        VITE_SUPABASE_ANON_KEY   (obligatoria; es la clave pública "anon"/"publishable")
+#        VITE_PUBLIC_SITE_URL     (opcional; por defecto https://<usuario>.github.io/<repo>)
+#        CUSTOM_DOMAIN            (opcional; p. ej. app.mimo.com.co → se publica en la raíz "/")
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Calcular ruta base y URL pública
+        id: site
+        run: |
+          REPO="${GITHUB_REPOSITORY#*/}"
+          OWNER="${GITHUB_REPOSITORY_OWNER,,}"
+          if [ -n "${{ vars.CUSTOM_DOMAIN }}" ]; then
+            BASE="/"; URL="https://${{ vars.CUSTOM_DOMAIN }}"
+          elif [ "$REPO" = "${OWNER}.github.io" ]; then
+            BASE="/"; URL="https://${OWNER}.github.io"
+          else
+            BASE="/${REPO}/"; URL="https://${OWNER}.github.io/${REPO}"
+          fi
+          if [ -n "${{ vars.VITE_PUBLIC_SITE_URL }}" ]; then URL="${{ vars.VITE_PUBLIC_SITE_URL }}"; fi
+          echo "base=$BASE" >> "$GITHUB_OUTPUT"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Ruta base: $BASE · URL pública: $URL"
+      - name: Verificar configuración de Supabase
+        run: |
+          if [ -z "${{ vars.VITE_SUPABASE_URL }}" ] || [ -z "${{ vars.VITE_SUPABASE_ANON_KEY }}" ]; then
+            echo "::error::Faltan las variables VITE_SUPABASE_URL y/o VITE_SUPABASE_ANON_KEY (Settings → Secrets and variables → Actions → Variables). Sin ellas el login, el panel y el seguimiento no funcionan."
+            exit 1
+          fi
+      - run: npm ci
+      - run: npm test
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_PUBLIC_SITE_URL: ${{ steps.site.outputs.url }}
+          VITE_BASE_PATH: ${{ steps.site.outputs.base }}
+      - name: Preparar SPA para GitHub Pages
+        run: |
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
+          if [ -n "${{ vars.CUSTOM_DOMAIN }}" ]; then echo "${{ vars.CUSTOM_DOMAIN }}" > dist/CNAME; fi
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

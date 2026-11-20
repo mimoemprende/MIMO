@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  :focus-visible { outline: none; }
+  h1, h2, h3 { letter-spacing: -0.01em; }
+}
+
+@layer utilities {
+  .bg-mimo-gradient { background: linear-gradient(135deg, #0040B7 0%, #0057e0 55%, #02a9d6 100%); }
+  .text-balance { text-wrap: balance; }
+}

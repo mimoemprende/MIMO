@@ -1,0 +1,29 @@
+name: Aplicar migraciones a Supabase
+
+# Ejecución MANUAL (Actions → "Aplicar migraciones a Supabase" → Run workflow).
+# Requiere el secreto SUPABASE_DB_URL (Settings → Secrets and variables → Actions → Secrets):
+#   Supabase → Project Settings → Database → Connection string → URI (con la contraseña de la BD).
+#   Ej.: postgresql://postgres.<ref>:<CONTRASEÑA>@aws-0-sa-east-1.pooler.supabase.com:5432/postgres
+# Solo aplica migraciones nuevas de supabase/migrations (registra las aplicadas en supabase_migrations).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verificar secreto
+        run: |
+          if [ -z "${{ secrets.SUPABASE_DB_URL }}" ]; then echo "::error::Falta el secreto SUPABASE_DB_URL"; exit 1; fi
+      - name: supabase db push
+        run: npx --yes supabase@3.2.0 db push --db-url "$SUPABASE_DB_URL" --yes
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}

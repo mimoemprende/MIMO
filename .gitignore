@@ -1,0 +1,14 @@
+node_modules
+dist
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+tests/screenshots/
+tests/local-stack/postgrest
+tests/local-stack/auth
+tests/local-stack/gotrue
+tests/local-stack/migrations/
+tests/local-stack/*.log
+__pycache__/
