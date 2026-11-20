@@ -1,6 +1,16 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const url = import.meta.env.VITE_SUPABASE_URL?.trim();
+/**
+ * Acepta la URL del proyecto aunque se haya copiado con ruta extra
+ * (p. ej. "https://xxx.supabase.co/rest/v1/"): supabase-js necesita solo el origen.
+ */
+function projectOrigin(raw?: string): string | undefined {
+  const v = raw?.trim();
+  if (!v) return undefined;
+  try { return new URL(v).origin; } catch { return v.replace(/\/+$/, ''); }
+}
+
+const url = projectOrigin(import.meta.env.VITE_SUPABASE_URL);
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 
 /** true cuando las variables de entorno de Supabase están definidas. */

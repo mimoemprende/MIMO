@@ -412,6 +412,11 @@ def main():
             page.wait_for_url(re.compile(r"#demo$"))
             page.wait_for_timeout(600)
             assert page.evaluate("Math.abs(document.getElementById('demo').getBoundingClientRect().top) < 120")
+            # Precios y compra
+            page.get_by_role("navigation", name="Principal").get_by_role("link", name="Precios").click()
+            expect(page.get_by_test_id("plan-price")).to_have_text(re.compile(r"\$\s?50\.000"))
+            page.get_by_role("button", name="Comprar MIMO").click()
+            expect(page.locator("#contacto form").get_by_label("Mensaje")).to_have_value(re.compile("Quiero comprar el plan MIMO"))
             page.get_by_role("link", name="Ver privacidad").click()
             page.wait_for_url(re.compile(r"/privacidad$"))
             page.get_by_role("link", name="Crear mi cuenta real").count()

@@ -194,5 +194,5 @@ No se simula ninguna de estas funciones: notificaciones automáticas por WhatsAp
 7. **Horario de atención:** solo avisa, no bloquea.
 8. **Asignación de vehículos a operarios:** no definida.
 9. **Retención de datos:** plazo no definido.
-10. **Precios del plan MIMO:** no definidos.
+10. **Precio del plan MIMO:** definido por el equipo en **$50.000 COP al mes por autolavado** (constante `PLAN_PRICE_COP` en `src/pages/public/Landing.tsx`). El botón *Comprar MIMO* envía una solicitud de compra al formulario de contacto (tabla `demo_requests`); el cobro se coordina manualmente. Falta definir si el precio incluye IVA y el medio de pago.
 11. **Demo de seguimiento:** el documento (§20.2) menciona 7 etapas, pero §21 prevalece: se usan 3.

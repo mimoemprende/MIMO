@@ -8,6 +8,7 @@ const links = [
   { hash: '#funcionalidades', label: 'Funcionalidades' },
   { hash: '#como-funciona', label: 'Cómo funciona' },
   { hash: '#demo', label: 'Demo' },
+  { hash: '#precios', label: 'Precios' },
   { hash: '#preguntas', label: 'Preguntas' },
   { hash: '#contacto', label: 'Contacto' },
 ];

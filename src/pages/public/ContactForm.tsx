@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Send } from 'lucide-react';
 import { Alert, Button, Field, Input, Textarea } from '../../components/ui';
@@ -8,8 +8,12 @@ import { friendlyError } from '../../lib/errors';
 
 const empty = { full_name: '', business_name: '', city: '', contact: '', message: '', consent: false };
 
-export default function ContactForm() {
+/** presetMessage: texto que se precarga (p. ej. desde la sección de precios). presetKey cambia en cada clic. */
+export default function ContactForm({ presetMessage, presetKey }: { presetMessage?: string; presetKey?: number }) {
   const [f, setF] = useState(empty);
+  useEffect(() => {
+    if (presetMessage) setF((p) => ({ ...p, message: presetMessage }));
+  }, [presetMessage, presetKey]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<'idle' | 'sending' | 'ok' | 'error'>('idle');
   const [msg, setMsg] = useState('');

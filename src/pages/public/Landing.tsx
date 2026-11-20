@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   CalendarDays, QrCode, MessageSquareHeart, ArrowRight, NotebookPen, Eye, MessagesSquare, LineChart,
-  ClipboardList, RefreshCw, Smartphone, Star, ChevronDown, Building2, ShieldCheck,
+  ClipboardList, RefreshCw, Smartphone, Star, ChevronDown, Building2, ShieldCheck, Check, ShoppingCart,
 } from 'lucide-react';
 import { PublicLayout } from '../../components/PublicLayout';
 import { LogoSlogan } from '../../components/Logo';
@@ -43,13 +43,26 @@ const benefits = [
   { icon: LineChart, title: 'Retroalimentación', text: 'Respuestas de encuestas guardadas y fáciles de revisar.' },
 ];
 
+/** Precio oficial del plan (COP por autolavado al mes). Cambiar aquí si el equipo lo ajusta. */
+export const PLAN_PRICE_COP = 50000;
+const PRICE_TEXT = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(PLAN_PRICE_COP);
+
+const planFeatures = [
+  'Agenda de reservas con cita y llegadas sin cita',
+  'Control de capacidad configurable por su autolavado',
+  'QR y enlace de seguimiento para cada vehículo',
+  'Encuestas de satisfacción y panel de resultados',
+  'Panel con indicadores del día',
+  'Usuarios operarios para su equipo',
+];
+
 const faqs = [
   { q: '¿Quién utiliza MIMO?', a: 'El propietario, administrador o encargado del autolavado, y opcionalmente operarios autorizados por él. Cada autolavado tiene su propio espacio y sus datos no son visibles para otros negocios.' },
   { q: '¿El cliente necesita crear una cuenta?', a: 'No. El cliente solo escanea el código QR o abre el enlace de su servicio. Ese enlace muestra únicamente su vehículo, nunca información de otros clientes.' },
   { q: '¿Cómo se comparte el enlace de seguimiento?', a: 'Al registrar el vehículo, MIMO genera un QR y un enlace único. Puede mostrar el QR en pantalla para que el cliente lo escanee, imprimirlo o copiar el enlace y enviarlo por el medio que usted ya utiliza. El envío automático por WhatsApp o correo no está incluido en esta versión.' },
   { q: '¿Qué significa “seguimiento en vivo”?', a: 'Significa que el cliente ve el estado del servicio tal como lo actualiza el personal del autolavado (Libre, En curso o Finalizado) y la hora de la última actualización. No es GPS, no muestra la ubicación del vehículo y no es vídeo en vivo.' },
   { q: '¿Cómo se controla la capacidad?', a: 'Cada autolavado configura cuántos vehículos puede atender al mismo tiempo. MIMO revisa esa capacidad al crear reservas y al registrar llegadas sin cita, y explica el conflicto cuando no hay cupo.' },
-  { q: '¿Cuánto cuesta?', a: 'Los planes y precios aún no están definidos. Escríbanos desde el formulario de contacto y le contaremos cómo participar en una prueba.' },
+  { q: '¿Cuánto cuesta?', a: `El plan MIMO cuesta ${PRICE_TEXT} al mes por autolavado e incluye todas las funciones: agenda, control de capacidad, seguimiento por QR y encuestas. Para comprarlo, use el botón “Comprar MIMO” de la sección Precios y el equipo le contactará para activar su plan.` },
 ];
 
 type DemoKey = 'agenda' | 'seguimiento' | 'encuesta';
@@ -57,6 +70,11 @@ type DemoKey = 'agenda' | 'seguimiento' | 'encuesta';
 export default function Landing() {
   const [demo, setDemo] = useState<DemoKey>('agenda');
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
+  const [buyPreset, setBuyPreset] = useState<{ msg: string; key: number } | null>(null);
+  const buy = () => {
+    setBuyPreset({ msg: `Quiero comprar el plan MIMO de ${PRICE_TEXT} al mes para mi autolavado.`, key: Date.now() });
+    document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' });
+  };
   const location = useLocation();
   // Navegación a secciones (#demo, #contacto…) también al venir desde otra página.
   useEffect(() => {
@@ -193,6 +211,32 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* PRECIOS */}
+      <section id="precios" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16">
+        <div className="text-center">
+          <h2 className="font-display text-3xl font-bold">Precios</h2>
+          <p className="mt-2 text-slate-600">Un solo plan, con todas las funciones incluidas.</p>
+        </div>
+        <div className="mx-auto mt-10 max-w-md overflow-hidden rounded-3xl bg-white shadow-card ring-2 ring-mimo-blue">
+          <div className="bg-mimo-gradient px-6 py-6 text-center text-white">
+            <p className="text-sm font-semibold uppercase tracking-wide text-white/85">Plan MIMO</p>
+            <p className="mt-2 font-display text-5xl font-extrabold" data-testid="plan-price">{PRICE_TEXT}</p>
+            <p className="mt-1 text-sm text-white/85">COP al mes · por autolavado</p>
+          </div>
+          <div className="p-6">
+            <ul className="space-y-3">
+              {planFeatures.map((f) => (
+                <li key={f} className="flex items-start gap-2 text-sm"><Check className="mt-0.5 h-4 w-4 shrink-0 text-mimo-blue" aria-hidden />{f}</li>
+              ))}
+            </ul>
+            <button onClick={buy} className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-mimo-yellow px-6 py-3 font-semibold text-mimo-ink hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-mimo-orange focus-visible:ring-offset-2">
+              <ShoppingCart className="h-4 w-4" aria-hidden />Comprar MIMO
+            </button>
+            <p className="mt-3 text-center text-xs text-slate-500">Al comprar, el equipo MIMO le contacta para confirmar el pago y activar su plan. El pago en línea aún no está disponible.</p>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ */}
       <section id="preguntas" className="mx-auto max-w-3xl scroll-mt-20 px-4 py-16">
         <h2 className="font-display text-3xl font-bold">Preguntas frecuentes</h2>
@@ -220,7 +264,7 @@ export default function Landing() {
               <Link to="/registro" className="rounded-xl bg-mimo-yellow px-5 py-2.5 font-semibold text-mimo-ink hover:brightness-95">Registrar mi autolavado</Link>
             </div>
           </div>
-          <ContactForm />
+          <ContactForm presetMessage={buyPreset?.msg} presetKey={buyPreset?.key} />
         </div>
       </section>
     </PublicLayout>
